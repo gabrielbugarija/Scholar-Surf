@@ -9,7 +9,7 @@ function Login() {
 
   const handleLogin = async () => {
     try {
-      const res = await axios.post("http://localhost:5000/Login", { email, password });
+      const res = await axios.post("http://localhost:3000/Login", { email, password });
 
       console.log("Login successful:", res.data);
 
