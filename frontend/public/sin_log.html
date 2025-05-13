@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Login | Scholar Surf</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+
+<body class="bg-gray-100 min-h-screen flex flex-col">
+    <!-- Navbar -->
+    <nav class="bg-blue-600 text-white p-4 flex justify-between items-center shadow-md">
+        <div class="text-xl font-bold">Scholar Surf</div>
+        <div class="space-x-4 text-sm">
+            <a href="sin_log.html" class="hover:underline">Login</a>
+            <a href="scholarships.html" class="hover:underline">Scholarships</a>
+        </div>
+    </nav>
+
+    <!-- Auth Form Section -->
+    <main class="flex-1 flex justify-center items-center p-6">
+        <div class="bg-white shadow-xl p-8 rounded-xl w-full max-w-md transition-all duration-300">
+            <h2 class="text-2xl font-bold text-center mb-6 text-gray-800" id="form-title">Login</h2>
+
+            <form id="auth-form" class="space-y-4">
+                <input name="name" type="text" placeholder="Full Name" class="input-field hidden" />
+                <input name="email" type="email" placeholder="Email" required class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                <input name="password" type="password" placeholder="Password" required class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                <input name="course" type="text" placeholder="Course" class="input-field hidden" />
+                <input name="year" type="number" placeholder="Year" class="input-field hidden" />
+
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 transition text-white py-2 w-full rounded-md font-semibold shadow-sm">
+          Submit
+        </button>
+            </form>
+
+            <p class="text-sm text-center mt-4 text-gray-600">
+                <span id="toggle-text">Don't have an account?</span>
+                <a href="#" id="toggle-link" class="text-blue-600 hover:underline font-medium">Sign up</a>
+            </p>
+
+            <p id="message" class="text-center text-sm mt-4 text-red-500 font-medium"></p>
+        </div>
+    </main>
+
+    <!-- Script -->
+    <script>
+        const form = document.getElementById("auth-form");
+        const title = document.getElementById("form-title");
+        const toggleText = document.getElementById("toggle-text");
+        const toggleLink = document.getElementById("toggle-link");
+        const msg = document.getElementById("message");
+        const inputs = form.querySelectorAll("input");
+
+        let isLogin = true;
+
+        toggleLink.addEventListener("click", () => {
+            isLogin = !isLogin;
+            title.textContent = isLogin ? "Login" : "Sign Up";
+            toggleText.textContent = isLogin ? "Don't have an account?" : "Already have an account?";
+            toggleLink.textContent = isLogin ? "Sign up" : "Log in";
+            inputs.forEach(input => {
+                if (["name", "course", "year"].includes(input.name)) {
+                    input.classList.toggle("hidden", isLogin);
+                }
+            });
+        });
+
+        form.addEventListener("submit", async(e) => {
+            e.preventDefault();
+            const data = Object.fromEntries(new FormData(form).entries());
+            const endpoint = isLogin ? "/api/login" : "/api/signup";
+            data.year = data.year ? parseInt(data.year) : undefined;
+
+            try {
+                const res = await fetch(`http://localhost:5000${endpoint}`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await res.json();
+                if (result.success) {
+                    msg.textContent = "✅ Success!";
+                    msg.classList.remove("text-red-500");
+                    msg.classList.add("text-green-600");
+                    form.reset();
+                } else {
+                    msg.textContent = "❌ " + result.message;
+                }
+            } catch (err) {
+                msg.textContent = "❌ Server error.";
+                console.error(err);
+            }
+        });
+    </script>
+</body>
+
+</html>
